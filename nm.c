@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/01/23 05:45:10 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/01/26 22:46:14 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "nm.h"
@@ -34,7 +34,7 @@ void		display_value(size_t value)
 	ft_putchar(' ');
 }
 
-char		display_symbole(size_t n_type, size_t n_sect, int value)
+char		display_symbole(size_t n_type, int value)
 {
 	size_t	tmp;
 	char	r;
@@ -42,7 +42,7 @@ char		display_symbole(size_t n_type, size_t n_sect, int value)
 	tmp = n_type;
 	r = 0;
 	n_type = n_type & N_TYPE;
-	if (n_type == N_UNDF)
+	if (n_type == N_UNDF || n_type == N_PBUD)
 	{
 		if (value)
 			r = 'C';
@@ -51,30 +51,26 @@ char		display_symbole(size_t n_type, size_t n_sect, int value)
 	}
 	if (n_type == N_ABS)
 		r = 'A';
-	if (n_type == N_PBUD)
-		r = 'U';
 	if (n_type == N_INDR)
 		r = 'I';
-	if (tmp == N_STAB)
-		r = 'Z';
 	if (!(tmp & N_EXT) && r)
 		r += 32;
 	return (r);
 }
 
-void		print_output(int nsyms, int symoff, int stroff, char *file)
+void		print_output(struct symtab_command *sym, struct segment_command_64 *seg, char *file)
 {
 	int				i;
 	char			*stringtable;
 	struct nlist_64	*tab;
 
-	tab = (void *)file + symoff;
-	stringtable = (void *)file + stroff;
+	tab = (void *)file + sym->symoff;
+	stringtable = (void *)file + sym->stroff;
 	i = 0;
-	while (i < nsyms)
+	while (i < sym->nsyms)
 	{
 		display_value(tab[i].n_value);
-		ft_putchar(display_symbole(tab[i].n_type, tab[i].n_sect, tab[i].n_value));
+		ft_putchar(display_symbole(tab[i].n_type, tab[i].n_value));
 		ft_putchar(' ');
 		ft_putstr_fd(stringtable + tab[i].n_un.n_strx, 1);
 		ft_putstr_fd("\n", 1);
@@ -99,7 +95,7 @@ void		handle_64(char *file)
 		if (lc->cmd == LC_SYMTAB)
 		{
 			sym = (struct symtab_command *) lc;
-			print_output(sym->nsyms, sym->symoff, sym->stroff, file);
+			print_output(sym, (struct segment_command_64 *)(lc + sizeof(struct segment_command_64)) + i, file);
 			break;
 		}
 		lc = (void *)lc + lc->cmdsize;
