@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/01/26 22:46:14 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/01/28 04:28:44 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "nm.h"
@@ -34,7 +34,18 @@ void		display_value(size_t value)
 	ft_putchar(' ');
 }
 
-char		display_symbole(size_t n_type, int value)
+char		use_buf(char *str)
+{
+	if (!ft_strcmp(str, SECT_TEXT))
+		return ('T');
+	if (!ft_strcmp(str, SECT_DATA))
+		return ('D');
+	if (!ft_strcmp(str, SECT_BSS))
+		return ('B');
+	return ('S');
+}
+
+char		display_symbole(size_t n_type, int value, char *buf)
 {
 	size_t	tmp;
 	char	r;
@@ -49,58 +60,144 @@ char		display_symbole(size_t n_type, int value)
 		else
 			r = 'U';
 	}
-	if (n_type == N_ABS)
+	else if (n_type == N_ABS)
 		r = 'A';
-	if (n_type == N_INDR)
+	else if (n_type == N_INDR)
 		r = 'I';
+	else if (n_type == N_SECT)
+		r = use_buf(buf);
 	if (!(tmp & N_EXT) && r)
 		r += 32;
 	return (r);
 }
 
-void		print_output(struct symtab_command *sym, struct segment_command_64 *seg, char *file)
+t_nm		*new_node(void *prev)
+{
+	t_nm	*ptr;
+
+	ptr = malloc(sizeof(t_nm));
+	if (!ptr)
+		return (NULL);
+	ptr->prev = prev;
+	return (ptr);
+}
+
+void		*prepare_print(struct symtab_command *sym, char **buf, char *file)
 {
 	int				i;
 	char			*stringtable;
 	struct nlist_64	*tab;
+	t_nm			*ptr;
+	void			*r;
 
 	tab = (void *)file + sym->symoff;
 	stringtable = (void *)file + sym->stroff;
 	i = 0;
+	ptr = new_node(NULL);
+	r = ptr;
 	while (i < sym->nsyms)
 	{
-		display_value(tab[i].n_value);
-		ft_putchar(display_symbole(tab[i].n_type, tab[i].n_value));
-		ft_putchar(' ');
-		ft_putstr_fd(stringtable + tab[i].n_un.n_strx, 1);
-		ft_putstr_fd("\n", 1);
+		ptr->hex = tab[i].n_value;
+		ptr->type = display_symbole(tab[i].n_type, tab[i].n_value, buf[tab[i].n_sect - 1]);
+		ptr->name = stringtable + tab[i].n_un.n_strx;
 		++i;
+		if (i < sym->nsyms)
+		{
+			ptr->next = new_node(ptr);
+			ptr = ptr->next;
+		}
+	}
+	return (r);
+}
+
+void		get_segment_name(struct segment_command_64 *seg, char **ptr)
+{
+	int		i;
+	int		i2;
+	struct section_64	*sec;
+
+	i = 0;
+	i2 = 0;
+	sec = (void *)((char*)seg + sizeof(struct segment_command_64));
+	while (ptr[i2])
+		++i2;
+	while (i < seg->nsects)
+	{
+		ptr[i2] = sec[i].sectname;
+		++i2;
+		++i;
+	}
+	ptr[i2] = NULL;
+}
+
+t_nm		*sort_list(t_nm *ptr)
+{
+	t_nm	*tmp;
+	char	flags;
+
+	while (ptr && ptr->next)
+	{
+		flags = 0;
+		if (ft_strcmp(ptr->name, ptr->next->name) > 0)
+		{
+			tmp = ptr;
+			ptr = ptr->next;
+			ptr->prev = tmp->prev;
+			if (tmp->prev)
+				tmp->prev->next = ptr;
+			tmp->next = ptr;
+			tmp->next = ptr->next;
+			if (tmp->next)
+				tmp->next->prev = tmp;
+			ptr->next = tmp;
+			flags = 1;
+		}
+		if (!flags)
+			ptr = ptr->next;
+		else
+			while (ptr->prev)
+				ptr = ptr->prev;
+	}
+	while (ptr->prev)
+		ptr = ptr->prev;
+	return (ptr);
+}
+
+void		display_list(t_nm *ptr)
+{
+	while (ptr)
+	{
+		display_value(ptr->hex);
+		ft_putchar(ptr->type);
+		ft_putstr(" ");
+		ft_putstr(ptr->name);
+		ft_putstr("\n");
+		ptr = ptr->next;
 	}
 }
 
 void		handle_64(char *file)
 {
-	int						ncmds;
 	int						i;
 	struct mach_header_64	*header;
 	struct load_command		*lc;
-	struct symtab_command	*sym;
+	char					*segment_name[4096];
+	t_nm					*tmp;
 
+	segment_name[0] = NULL;
 	header = (struct mach_header_64 *)file;
-	ncmds = header->ncmds;
 	i = 0;
 	lc = (void *)file + sizeof(struct mach_header_64);
-	while (i < ncmds)
+	while (i < header->ncmds)
 	{
 		if (lc->cmd == LC_SYMTAB)
-		{
-			sym = (struct symtab_command *) lc;
-			print_output(sym, (struct segment_command_64 *)(lc + sizeof(struct segment_command_64)) + i, file);
-			break;
-		}
+			tmp = sort_list(prepare_print((struct symtab_command *)lc, segment_name, file));
+		if (lc->cmd == LC_SEGMENT_64)
+			get_segment_name((void *)lc, segment_name);
 		lc = (void *)lc + lc->cmdsize;
 		++i;
 	}
+	display_list(tmp);
 }
 
 void		ft_nm(char *file)
@@ -108,10 +205,8 @@ void		ft_nm(char *file)
 	int		magic_number;
 
 	magic_number = *(int *)file;
-	if (magic_number == MH_MAGIC_64)
-	{
+	if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
 		handle_64(file);
-	}
 }
 
 int			main(int ac, char **av)
