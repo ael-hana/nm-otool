@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/01/28 04:28:44 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/01/28 04:43:57 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "nm.h"
@@ -130,37 +130,52 @@ void		get_segment_name(struct segment_command_64 *seg, char **ptr)
 	ptr[i2] = NULL;
 }
 
-t_nm		*sort_list(t_nm *ptr)
+t_nm		*reset_list(t_nm *ptr)
 {
-	t_nm	*tmp;
-	char	flags;
-
-	while (ptr && ptr->next)
-	{
-		flags = 0;
-		if (ft_strcmp(ptr->name, ptr->next->name) > 0)
-		{
-			tmp = ptr;
-			ptr = ptr->next;
-			ptr->prev = tmp->prev;
-			if (tmp->prev)
-				tmp->prev->next = ptr;
-			tmp->next = ptr;
-			tmp->next = ptr->next;
-			if (tmp->next)
-				tmp->next->prev = tmp;
-			ptr->next = tmp;
-			flags = 1;
-		}
-		if (!flags)
-			ptr = ptr->next;
-		else
-			while (ptr->prev)
-				ptr = ptr->prev;
-	}
 	while (ptr->prev)
 		ptr = ptr->prev;
 	return (ptr);
+}
+
+int			sorted(t_nm *ptr)
+{
+	while (ptr->prev)
+		ptr = ptr->prev;
+	while (ptr->next)
+	{
+		if (ft_strcmp(ptr->name, ptr->next->name) > 0)
+			return (0);
+		ptr = ptr->next;
+	}
+	return (1);
+}
+
+t_nm		*sort_list(t_nm *ptr)
+{
+	t_nm	*tmp;
+
+	while (!sorted(ptr))
+	{
+		ptr = reset_list(ptr);
+		while (ptr->next)
+		{
+			if (ft_strcmp(ptr->name, ptr->next->name) > 0)
+			{
+				tmp = ptr;
+				ptr = ptr->next;
+				ptr->prev = tmp->prev;
+				if (tmp->prev)
+					tmp->prev->next = ptr;
+				tmp->prev = ptr;
+				tmp->next = ptr->next;
+				if (tmp->next)
+					tmp->next->prev = tmp;
+				ptr->next = tmp;
+			}
+			ptr = ptr->next;
+		}
+	}
+	return (reset_list(ptr));
 }
 
 void		display_list(t_nm *ptr)
