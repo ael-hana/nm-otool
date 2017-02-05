@@ -110,6 +110,35 @@ void		*prepare_print(struct symtab_command *sym, char **buf, char *file)
 	return (r);
 }
 
+void		*prepare_print_32(struct symtab_command *sym, char **buf, char *file)
+{
+	int				i;
+	char			*stringtable;
+	struct nlist	*tab;
+	t_nm			*ptr;
+	void			*r;
+
+	tab = (void *)file + sym->symoff;
+	stringtable = (void *)file + sym->stroff;
+	i = 0;
+	ptr = new_node(NULL);
+	r = ptr;
+	while (i < sym->nsyms)
+	{
+		ptr->hex = tab[i].n_value;
+		ptr->type = display_symbole(tab[i].n_type, tab[i].n_value, buf[tab[i].n_sect - 1]);
+		ptr->name = stringtable + tab[i].n_un.n_strx;
+		++i;
+		if (i < sym->nsyms)
+		{
+			ptr->next = new_node(ptr);
+			ptr = ptr->next;
+		}
+	}
+	return (r);
+}
+
+
 void		get_segment_name(struct segment_command_64 *seg, char **ptr)
 {
 	int		i;
@@ -119,6 +148,26 @@ void		get_segment_name(struct segment_command_64 *seg, char **ptr)
 	i = 0;
 	i2 = 0;
 	sec = (void *)((char*)seg + sizeof(struct segment_command_64));
+	while (ptr[i2])
+		++i2;
+	while (i < seg->nsects)
+	{
+		ptr[i2] = sec[i].sectname;
+		++i2;
+		++i;
+	}
+	ptr[i2] = NULL;
+}
+
+void		get_segment_name_32(struct segment_command *seg, char **ptr)
+{
+	int		i;
+	int		i2;
+	struct section	*sec;
+
+	i = 0;
+	i2 = 0;
+	sec = (void *)((char*)seg + sizeof(struct segment_command));
 	while (ptr[i2])
 		++i2;
 	while (i < seg->nsects)
@@ -215,6 +264,30 @@ void		handle_64(char *file)
 	display_list(tmp);
 }
 
+void		handle(char *file)
+{
+	int						i;
+	struct mach_header		*header;
+	struct load_command		*lc;
+	char					*segment_name[4096];
+	t_nm					*tmp;
+
+	segment_name[0] = NULL;
+	header = (struct mach_header *)file;
+	i = 0;
+	lc = (void *)file + sizeof(struct mach_header);
+	while (i < header->ncmds)
+	{
+		if (lc->cmd == LC_SYMTAB)
+			tmp = sort_list(prepare_print_32((struct symtab_command *)lc, segment_name, file));
+		else if (lc->cmd == LC_SEGMENT)
+			get_segment_name_32((void *)lc, segment_name);
+		lc = (void *)lc + lc->cmdsize;
+		++i;
+	}
+	display_list(tmp);
+}
+
 void		ft_nm(char *file)
 {
 	int		magic_number;
@@ -222,6 +295,8 @@ void		ft_nm(char *file)
 	magic_number = *(int *)file;
 	if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
 		handle_64(file);
+	else if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
+		handle(file);
 }
 
 int			main(int ac, char **av)
