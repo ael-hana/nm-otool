@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/01/28 04:43:57 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/02/21 18:23:50 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "nm.h"
@@ -15,7 +15,7 @@ void		ft_putnbr_base(unsigned long long int num, int base)
 {
 	char	*str;
 
-	str = "0123456789ABCDEFGHIJKLMNOP";
+	str = "0123456789abcdef";
 	if (num / base)
 		ft_putnbr_base(num / base, base);
 	write(1, str + (num % base), 1);
@@ -288,7 +288,69 @@ void		handle(char *file)
 	display_list(tmp);
 }
 
-void		ft_nm(char *file)
+int			reverse_int(int x)
+{
+	x = ((x << 8) & 0xFF00FF00) | ((x >> 8) & 0xFF00FF);
+	return (x << 16) | (x >> 16);
+}
+
+void		fat_handle(char *file, char *str)
+{
+	struct fat_header	*header;
+	struct fat_arch		*arch;
+	int					i;
+	int					offset;
+
+	i = 0;
+	header = (struct fat_header *)file;
+	arch = (void*)&header[1];
+	while (i < reverse_int(header->nfat_arch))
+	{
+		if (reverse_int(arch->cputype) == CPU_TYPE_X86_64
+				|| reverse_int(arch->cputype) == CPU_TYPE_X86)
+			offset = arch->offset;
+		++i;
+		++arch;
+	}
+	ft_nm(file + reverse_int(offset), str);
+}
+
+void		ft_printName(char *str, char *str2)
+{
+	ft_putstr("\n");
+	ft_putstr(str);
+	ft_putstr("(");
+	ft_putstr(str2);
+	ft_putstr(")\n");
+}
+
+void		handle_ar(char *file, char *filename)
+{
+	struct ar_hdr	*header;
+	struct ranlib	*rl;
+	char			*str;
+	int				ext_num;
+	int				size;
+	int					i;
+
+	header = (void *)file + SARMAG;
+	ext_num = ft_atoi(header->ar_name + ft_strlen(AR_EFMT1));
+	str = (void*)file + sizeof(struct ar_hdr) + SARMAG + ext_num;
+	rl = (void*)str + 4;
+	size = *((int *)str);
+	size /= sizeof(struct ranlib);
+	i = 0;
+	while (i < size)
+	{
+		header = (void*)file + rl[i].ran_off;
+		str = ft_strstr(header->ar_name, ARFMAG) + ft_strlen(ARFMAG);
+		ft_printName(filename, str);
+		ft_nm((void*)header + sizeof(struct ar_hdr) + ext_num, str);
+		i++;
+	}
+}
+
+void		ft_nm(char *file, char *filename)
 {
 	int		magic_number;
 
@@ -297,6 +359,17 @@ void		ft_nm(char *file)
 		handle_64(file);
 	else if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
 		handle(file);
+	else if (magic_number == FAT_CIGAM || magic_number == FAT_CIGAM)
+	{
+		fat_handle(file, filename);
+	}
+	else
+	{
+		if (!ft_strncmp(file, ARMAG, SARMAG))
+			handle_ar(file, filename);
+		else
+			ft_putstr("Here");
+	}
 }
 
 int			main(int ac, char **av)
@@ -326,7 +399,7 @@ int			main(int ac, char **av)
 		ft_putstr_fd("Mmap failed\n", 2);
 		return (EXIT_FAILURE);
 	}
-	ft_nm(ptr);
+	ft_nm(ptr, av[2]);
 	munmap(ptr, buf.st_size);
 	return (0);
 }
