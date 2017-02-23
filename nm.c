@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/02/21 18:23:50 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/02/22 21:43:55 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "nm.h"
@@ -360,9 +360,7 @@ void		ft_nm(char *file, char *filename)
 	else if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
 		handle(file);
 	else if (magic_number == FAT_CIGAM || magic_number == FAT_CIGAM)
-	{
 		fat_handle(file, filename);
-	}
 	else
 	{
 		if (!ft_strncmp(file, ARMAG, SARMAG))
