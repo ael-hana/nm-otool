@@ -60,27 +60,67 @@ void		handle(char *file)
 	display_list(tmp);
 }
 
+int					*sorttab(int *tab, int len)
+{
+	int				i;
+	int				tmp;
+
+	i = 0;
+	while (len > (i + 1))
+	{
+		if (tab[i] > tab[i + 1])
+		{
+			tmp = tab[i];
+			tab[i] = tab[i + 1];
+			tab[i + 1] = tmp;
+			i = 0;
+		}
+		else
+			++i;
+	}
+	return (tab);
+}
+
+int					*gen_array(struct ranlib *rl, size_t len, char *ptr)
+{
+	struct ar_hdr	*ar;
+	int				*arr;
+	size_t			i;
+
+	arr = malloc(sizeof(arr) * (len + 1));
+	ft_bzero(arr, len + 1);
+	i = 0;
+	while (i < len)
+	{
+		ar = (void*)ptr + rl[i].ran_off;
+		arr[i] = rl[i].ran_off;
+		i++;
+	}
+	return (arr);
+}
+
 void		handle_ar(char *file, char *filename)
 {
 	struct ar_hdr	*header;
-	struct ranlib	*rl;
 	char			*str;
 	int				ext_num;
-	int				size;
-	int					i;
+	size_t			size;
+	size_t			i;
+	int				*tab;
 
 	header = (void *)file + SARMAG;
 	ext_num = ft_atoi(header->ar_name + ft_strlen(AR_EFMT1));
-	str = (void*)file + sizeof(struct ar_hdr) + SARMAG + ext_num;
-	rl = (void*)str + 4;
+	str = (void*)file + sizeof(*header) + SARMAG + ext_num;
 	size = *((int *)str);
 	size /= sizeof(struct ranlib);
+	tab = sorttab(gen_array((void *)str + 4, size, file), size);
 	i = 0;
 	while (i < size)
 	{
-		header = (void*)file + rl[i].ran_off;
+		header = (void*)file + tab[i];
 		str = ft_strstr(header->ar_name, ARFMAG) + ft_strlen(ARFMAG);
 		ft_printName(filename, str);
+		(void) filename;
 		ft_nm((void*)header + sizeof(struct ar_hdr) + ext_num, str);
 		i++;
 	}

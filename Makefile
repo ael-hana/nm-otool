@@ -17,8 +17,8 @@ OBJ_OTOOL=$(SRC_OTOOL:.c=.o)
 $(NAME):
 	make -C libft/
 	$(CC) $(CFLAGS) -c $(SRC)
-	$(CC) $(CFLAGS) -c $(SRC_OTOOL)
 	$(CC) $(CFLAGS) $(OBJ) libft/libft.a -o ft_nm
+	$(CC) $(CFLAGS) -c $(SRC_OTOOL)
 	$(CC) $(CFLAGS) $(OBJ_OTOOL) libft/libft.a -o ft_otool
 
 all: $(NAME)
