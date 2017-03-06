@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/02/22 21:43:55 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/05 17:10:36 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "nm.h"
@@ -100,6 +100,8 @@ void		*prepare_print(struct symtab_command *sym, char **buf, char *file)
 		ptr->hex = tab[i].n_value;
 		ptr->type = display_symbole(tab[i].n_type, tab[i].n_value, buf[tab[i].n_sect - 1]);
 		ptr->name = stringtable + tab[i].n_un.n_strx;
+		if (tab[i].n_type & N_STAB)
+			ptr->type = '*';
 		++i;
 		if (i < sym->nsyms)
 		{
@@ -128,6 +130,8 @@ void		*prepare_print_32(struct symtab_command *sym, char **buf, char *file)
 		ptr->hex = tab[i].n_value;
 		ptr->type = display_symbole(tab[i].n_type, tab[i].n_value, buf[tab[i].n_sect - 1]);
 		ptr->name = stringtable + tab[i].n_un.n_strx;
+		if (tab[i].n_type & N_STAB)
+			ptr->type = '*';
 		++i;
 		if (i < sym->nsyms)
 		{
@@ -229,7 +233,7 @@ t_nm		*sort_list(t_nm *ptr)
 
 void		display_list(t_nm *ptr)
 {
-	while (ptr)
+	while (ptr && ptr->type != '*')
 	{
 		display_value(ptr->hex);
 		ft_putchar(ptr->type);
