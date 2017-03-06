@@ -40,7 +40,7 @@ void		display_section(long long int addres, int size, char *ptr)
 
 void		get_seg_64(struct segment_command_64 *seg, struct mach_header_64 *h)
 {
-	int					i;
+	size_t				i;
 	struct section_64	*sec;
 
 	i = 0;
@@ -60,7 +60,7 @@ void		get_seg_64(struct segment_command_64 *seg, struct mach_header_64 *h)
 
 void		get_seg(struct segment_command *seg, struct mach_header *h)
 {
-	int					i;
+	size_t				i;
 	struct section		*sec;
 
 	i = 0;
@@ -80,7 +80,7 @@ void		get_seg(struct segment_command *seg, struct mach_header *h)
 
 void		handle_64_otool(char *file)
 {
-	int						i;
+	size_t					i;
 	struct mach_header_64	*header;
 	struct load_command		*lc;
 
@@ -98,7 +98,7 @@ void		handle_64_otool(char *file)
 
 void		handle_otool(char *file)
 {
-	int						i;
+	size_t					i;
 	struct mach_header		*header;
 	struct load_command		*lc;
 
@@ -114,15 +114,38 @@ void		handle_otool(char *file)
 	}
 }
 
+void		handle_otool_ar(char *file, char *filename)
+{
+	struct ar_hdr	*header;
+	char			*str;
+	int				ext_num;
+	int				size;
+	int				*ptr;
+
+	header = (void *)file + SARMAG;
+	ext_num = ft_atoi(header->ar_name + ft_strlen(AR_EFMT1));
+	str = (void*)file + sizeof(struct ar_hdr) + SARMAG + ext_num;
+	size = *((int *)str);
+	size /= sizeof(struct ranlib);
+	list = 
+}
+
 void		ft_otool(char *file, char *filename)
 {
-	int		magic_number;
+	unsigned int	magic_number;
 
 	magic_number = *(int *)file;
 	if (magic_number == MH_MAGIC_64 || magic_number == MH_CIGAM_64)
 		handle_64_otool(file);
 	else if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
 		handle_otool(file);
+	else
+	{
+		if (ft_strncmp(file, ARMAG, SARMAG) == 0)
+			handle_otool_ar(file, filename);
+		else
+			ft_putendl("Unknown binary");
+	}
 }
 
 int			main(int ac, char **av)
