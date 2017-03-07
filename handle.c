@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/05 19:15:53 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/05 20:31:41 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 17:04:22 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void		handle_64(char *file)
 	struct load_command		*lc;
 	char					*segment_name[4096];
 	t_nm					*tmp;
+	struct symtab_command	*sym;
 
 	segment_name[0] = NULL;
 	header = (struct mach_header_64 *)file;
@@ -27,12 +28,13 @@ void		handle_64(char *file)
 	while (i < header->ncmds)
 	{
 		if (lc->cmd == LC_SYMTAB)
-			tmp = sort_list(prepare_print((struct symtab_command *)lc, segment_name, file));
+			sym = (struct symtab_command *)lc;
 		if (lc->cmd == LC_SEGMENT_64)
 			get_segment_name((void *)lc, segment_name);
 		lc = (void *)lc + lc->cmdsize;
 		++i;
 	}
+	tmp = sort_list(prepare_print(sym, segment_name, file));
 	display_list(tmp);
 }
 
@@ -42,6 +44,7 @@ void		handle(char *file)
 	struct mach_header		*header;
 	struct load_command		*lc;
 	char					*segment_name[4096];
+	struct symtab_command	*sym;
 	t_nm					*tmp;
 
 	segment_name[0] = NULL;
@@ -51,12 +54,13 @@ void		handle(char *file)
 	while (i < header->ncmds)
 	{
 		if (lc->cmd == LC_SYMTAB)
-			tmp = sort_list(prepare_print_32((struct symtab_command *)lc, segment_name, file));
+			sym = (struct symtab_command *)lc;
 		else if (lc->cmd == LC_SEGMENT)
 			get_segment_name_32((void *)lc, segment_name);
 		lc = (void *)lc + lc->cmdsize;
 		++i;
 	}
+	tmp = sort_list(prepare_print_32(sym, segment_name, file));
 	display_list(tmp);
 }
 

@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/05 19:08:06 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/05 19:52:04 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 17:28:08 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,9 @@ void		display_list(t_nm *ptr)
 {
 	while (ptr && ptr->type != '*')
 	{
-		display_value(ptr->hex);
+		//display_value(ptr->hex);
+		ft_putstr(ptr->hex);
+		ft_putstr(" ");
 		ft_putchar(ptr->type);
 		ft_putstr(" ");
 		ft_putstr(ptr->name);

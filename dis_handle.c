@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/05 19:26:55 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/05 19:49:21 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 17:29:44 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,42 @@ void		get_segment_name_32(struct segment_command *seg, char **ptr)
 	ptr[i2] = NULL;
 }
 
+static void		init(char **str, int len)
+{
+	int i;
+
+	i = 0;
+	*str = malloc(sizeof(char) * (len + 1));
+	while (i < (len + 1))
+	{
+		(*str)[i++] = '0';
+	}
+	(*str)[i] = '\0';
+}
+
+static int		gen_hexa(unsigned long n, char **str, int i)
+{
+	unsigned int			a;
+	unsigned int			u;
+	char					*val;
+
+	val = "0123456789abcdef";
+	u = 0;
+	a = n % 16;
+	n = n / 16;
+	if (n > 0)
+		u = u + gen_hexa(n, str, (i - 1));
+	(*str)[i] = val[a];
+	u++;
+	return (u);
+}
+
+int				ft_hexa(unsigned long n, char **str, int i)
+{
+	init(str, i);
+	return (gen_hexa(n, str, i));
+}
+
 void		*prepare_print(struct symtab_command *sym, char **buf, char *file)
 {
 	size_t			i;
@@ -67,7 +103,8 @@ void		*prepare_print(struct symtab_command *sym, char **buf, char *file)
 	r = ptr;
 	while (i < sym->nsyms)
 	{
-		ptr->hex = tab[i].n_value;
+		if (tab[i].n_value || (tab[i].n_type & N_TYPE) == N_SECT)
+			ft_hexa(tab[i].n_value, &ptr->hex, 15);
 		ptr->type = display_symbole(tab[i].n_type, tab[i].n_value, buf[tab[i].n_sect - 1]);
 		ptr->name = stringtable + tab[i].n_un.n_strx;
 		ptr->type = (tab[i].n_type & N_STAB) ? '*' : ptr->type;
@@ -96,7 +133,9 @@ void		*prepare_print_32(struct symtab_command *sym,
 	r = ptr;
 	while (i < sym->nsyms)
 	{
-		ptr->hex = tab[i].n_value;
+		if (tab[i].n_value || (tab[i].n_type & N_TYPE) == N_SECT)
+			ft_hexa(tab[i].n_value, &ptr->hex, 15);
+		//ptr->hex = tab[i].n_value;
 		ptr->type = display_symbole(tab[i].n_type, tab[i].n_value,
 					buf[tab[i].n_sect - 1]);
 		ptr->name = stringtable + tab[i].n_un.n_strx;

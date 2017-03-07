@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:13:02 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/05 19:52:02 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 17:23:33 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 # include <stdlib.h>
 
 typedef struct			s_nm{
-	size_t				hex;
+	char				*hex;
 	char				type;
 	char				*name;
 	struct s_nm			*prev;
