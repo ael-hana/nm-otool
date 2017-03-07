@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/05 19:15:53 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 21:26:42 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 22:23:47 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ void						handle_64(char *file)
 		lc = (void *)lc + lc->cmdsize;
 		++i;
 	}
+	if (!sym)
+		return ;
 	display_list(sort_list(prepare_print(sym, segment_name, file)));
 }
 
@@ -57,6 +59,8 @@ void						handle(char *file)
 		lc = (void *)lc + lc->cmdsize;
 		++i;
 	}
+	if (!sym)
+		return ;
 	display_list(sort_list(prepare_print_32(sym, segment_name, file)));
 }
 

@@ -6,13 +6,13 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/05 19:08:06 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 21:12:04 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 23:17:05 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "nm.h"
 
-void		display_list(t_nm *ptr)
+void					display_list(t_nm *ptr)
 {
 	while (ptr)
 	{
@@ -31,13 +31,13 @@ void		display_list(t_nm *ptr)
 	}
 }
 
-int			reverse_int(int x)
+int						reverse_int(int x)
 {
 	x = ((x << 8) & 0xFF00FF00) | ((x >> 8) & 0xFF00FF);
 	return (x << 16) | (x >> 16);
 }
 
-void		ft_printname(char *str, char *str2)
+void					ft_printname(char *str, char *str2)
 {
 	ft_putstr("\n");
 	ft_putstr(str);
@@ -46,12 +46,33 @@ void		ft_printname(char *str, char *str2)
 	ft_putstr("):\n");
 }
 
-void		ft_putnbr_base(unsigned long long int num, int base)
+void					ft_putnbr_base(unsigned long long int num, int base)
 {
-	char	*str;
+	char				*str;
 
 	str = "0123456789abcdef";
 	if (num / base)
 		ft_putnbr_base(num / base, base);
 	write(1, str + (num % base), 1);
+}
+
+void					fat_handle(char *file, char *str)
+{
+	struct fat_header	*header;
+	struct fat_arch		*arch;
+	int					i;
+	int					offset;
+
+	i = 0;
+	header = (struct fat_header *)file;
+	arch = (void*)&header[1];
+	while (i < reverse_int(header->nfat_arch))
+	{
+		if (reverse_int(arch->cputype) == CPU_TYPE_X86_64
+			|| reverse_int(arch->cputype) == CPU_TYPE_X86)
+			offset = arch->offset;
+		++i;
+		++arch;
+	}
+	ft_nm(file + reverse_int(offset), str);
 }

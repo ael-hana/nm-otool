@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 21:22:28 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 23:17:07 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,12 +58,15 @@ void				ft_nm(char *file, char *filename)
 		handle_64(file);
 	else if (magic_number == MH_MAGIC || magic_number == MH_CIGAM)
 		handle(file);
+	else if (magic_number == FAT_CIGAM || magic_number == FAT_CIGAM)
+		fat_handle(file, filename);
 	else
 	{
 		if (!ft_strncmp(file, ARMAG, SARMAG))
 			handle_ar(file, filename);
 		else
-			ft_printf("File format unknown for %s", filename);
+			ft_printf("ft_nm: %s: %s", filename,
+					"The file was not recognized as a valid object file.\n");
 	}
 }
 
