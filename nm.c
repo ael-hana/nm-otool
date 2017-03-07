@@ -6,12 +6,50 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:02:33 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 16:55:08 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 21:22:28 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "nm.h"
 
-void			ft_nm(char *file, char *filename)
+char				use_buf(char *str)
+{
+	if (!ft_strcmp(str, SECT_TEXT))
+		return ('T');
+	if (!ft_strcmp(str, SECT_DATA))
+		return ('D');
+	if (!ft_strcmp(str, SECT_BSS))
+		return ('B');
+	return ('S');
+}
+
+char				display_symbole(size_t n_type, int value, char *buf)
+{
+	size_t			tmp;
+	char			r;
+
+	tmp = n_type;
+	r = 0;
+	n_type = n_type & N_TYPE;
+	if (n_type == N_UNDF || n_type == N_PBUD)
+	{
+		if (value)
+			r = 'C';
+		else
+			r = 'U';
+	}
+	else if (n_type == N_ABS)
+		r = 'A';
+	else if (n_type == N_INDR)
+		r = 'I';
+	else if (n_type == N_SECT)
+		r = use_buf(buf);
+	if (!(tmp & N_EXT) && r)
+		r += 32;
+	return (r);
+}
+
+void				ft_nm(char *file, char *filename)
 {
 	unsigned int	magic_number;
 
@@ -24,22 +62,24 @@ void			ft_nm(char *file, char *filename)
 	{
 		if (!ft_strncmp(file, ARMAG, SARMAG))
 			handle_ar(file, filename);
+		else
+			ft_printf("File format unknown for %s", filename);
 	}
 }
 
-static void		run_nm(char *str)
+static void			run_nm(char *str)
 {
-	int		fd;
-	char	*ptr;
-	struct stat	buf;
+	int				fd;
+	char			*ptr;
+	struct stat		buf;
 
 	if ((fd = open(str, O_RDONLY)) < 0)
 		ft_putstr_fd("Open failed\n", 2);
 	else if (fstat(fd, &buf) < 0)
 		ft_putstr_fd("Stat failed\n", 2);
 	else if ((ptr = mmap(0, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) ==
-				MAP_FAILED)
-	ft_putstr_fd("Mmap failed\n", 2);
+		MAP_FAILED)
+		ft_putstr_fd("Mmap failed\n", 2);
 	else
 	{
 		ft_nm(ptr, str);
@@ -47,9 +87,9 @@ static void		run_nm(char *str)
 	}
 }
 
-int			main(int ac, char **av)
+int					main(int ac, char **av)
 {
-	int		i;
+	int				i;
 
 	i = 1;
 	if (ac < 3)

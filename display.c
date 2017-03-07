@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/05 19:08:06 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 17:28:08 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 21:12:04 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,19 @@
 
 void		display_list(t_nm *ptr)
 {
-	while (ptr && ptr->type != '*')
+	while (ptr)
 	{
-		//display_value(ptr->hex);
-		ft_putstr(ptr->hex);
-		ft_putstr(" ");
-		ft_putchar(ptr->type);
-		ft_putstr(" ");
-		ft_putstr(ptr->name);
-		ft_putstr("\n");
+		if (ptr->type == '*')
+			(void)ptr;
+		else if (ptr->type != 'U')
+		{
+			if (ptr->hex > 0)
+				ft_printf("%016llx %c %s\n", ptr->hex, ptr->type, ptr->name);
+			else
+				ft_printf("%015x %c %s\n", ptr->hex, ptr->type, ptr->name);
+		}
+		else
+			ft_printf("%s %c %s\n", "                ", ptr->type, ptr->name);
 		ptr = ptr->next;
 	}
 }
@@ -33,13 +37,13 @@ int			reverse_int(int x)
 	return (x << 16) | (x >> 16);
 }
 
-void		ft_printName(char *str, char *str2)
+void		ft_printname(char *str, char *str2)
 {
 	ft_putstr("\n");
 	ft_putstr(str);
 	ft_putstr("(");
 	ft_putstr(str2);
-	ft_putstr(")\n");
+	ft_putstr("):\n");
 }
 
 void		ft_putnbr_base(unsigned long long int num, int base)
@@ -50,17 +54,4 @@ void		ft_putnbr_base(unsigned long long int num, int base)
 	if (num / base)
 		ft_putnbr_base(num / base, base);
 	write(1, str + (num % base), 1);
-}
-
-
-void		display_value(size_t value)
-{
-	if (value > 0)
-	{
-		ft_putstr("0000000");
-		ft_putnbr_base(value, 16);
-	}
-	else
-		ft_putstr("                ");
-	ft_putchar(' ');
 }

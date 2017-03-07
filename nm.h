@@ -6,32 +6,33 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:13:02 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 17:23:33 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 21:26:40 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef NM_H
 # define NM_H
 # include "libft/libft.h"
+# include "ft_printf/ft_printf.h"
 # include <stdio.h>
 # include <mach-o/loader.h>
 # include <mach-o/nlist.h>
 # include <mach-o/fat.h>
-# include <ar.h>
 # include <mach-o/ranlib.h>
+# include <ar.h>
 # include <fcntl.h>
 # include <sys/stat.h>
 # include <sys/mman.h>
 # include <stdlib.h>
 
 typedef struct			s_nm{
-	char				*hex;
+	size_t				hex;
 	char				type;
 	char				*name;
 	struct s_nm			*prev;
 	struct s_nm			*next;
 }						t_nm;
-void					ft_printName(char *str, char *str2);
+void					ft_printname(char *str, char *str2);
 int						reverse_int(int x);
 void					display_list(t_nm *ptr);
 void					display_value(size_t value);

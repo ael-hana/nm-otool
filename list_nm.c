@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/05 19:30:53 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/05 19:32:06 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 21:22:26 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@ t_nm		*new_node(void *prev)
 	ptr = malloc(sizeof(t_nm));
 	if (!ptr)
 		return (NULL);
+	ft_bzero(ptr, sizeof(t_nm));
+	ptr->type = 'U';
 	ptr->prev = prev;
 	return (ptr);
 }
@@ -64,7 +66,7 @@ t_nm		*sort_list(t_nm *ptr)
 				if (tmp->next)
 					tmp->next->prev = tmp;
 				ptr->next = tmp;
-;			}
+			}
 			ptr = ptr->next;
 		}
 	}
