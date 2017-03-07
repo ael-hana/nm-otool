@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:13:02 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 23:17:04 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/06 23:24:36 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,4 +56,5 @@ int						sorted(t_nm *ptr);
 t_nm					*sort_list(t_nm *ptr);
 void					ft_nm(char *file, char *filename);
 void					fat_handle(char *file, char *str);
+void					ft_otool(char *file, char *filename);
 #endif
