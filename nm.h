@@ -6,7 +6,7 @@
 /*   By: ael-hana <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/21 23:13:02 by ael-hana          #+#    #+#             */
-/*   Updated: 2017/03/06 23:24:36 by ael-hana         ###   ########.fr       */
+/*   Updated: 2017/03/07 17:34:29 by ael-hana         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,4 +57,13 @@ t_nm					*sort_list(t_nm *ptr);
 void					ft_nm(char *file, char *filename);
 void					fat_handle(char *file, char *str);
 void					ft_otool(char *file, char *filename);
+void					handle_otool_ar(char *file, char *filename);
+void					display_section(long long int addres,
+						int size, char *ptr);
+void					get_seg(struct segment_command *seg,
+						struct mach_header *h);
+void					get_seg_64(struct segment_command_64 *seg,
+						struct mach_header_64 *h);
+void					h_z(unsigned long long int num);
+int						reverse_int(int x);
 #endif

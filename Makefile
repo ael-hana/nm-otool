@@ -8,7 +8,7 @@ RM=rm -f
 
 SRC=nm.c dis_handle.c display.c handle.c list_nm.c
 
-SRC_OTOOL= otool.c
+SRC_OTOOL= otool.c dis_handle_otool.c handle_otool.c num_otool.c
 
 OBJ=$(SRC:.c=.o)
 
@@ -20,7 +20,7 @@ $(NAME):
 	$(CC) $(CFLAGS) -c $(SRC)
 	$(CC) $(CFLAGS) $(OBJ) libft/libft.a ft_printf/libftprintf.a -o ft_nm
 	$(CC) $(CFLAGS) -c $(SRC_OTOOL)
-	$(CC) $(CFLAGS) $(OBJ_OTOOL) libft/libft.a -o ft_otool
+	$(CC) $(CFLAGS) $(OBJ_OTOOL) libft/libft.a ft_printf/libftprintf.a -o ft_otool
 
 all: $(NAME)
 
